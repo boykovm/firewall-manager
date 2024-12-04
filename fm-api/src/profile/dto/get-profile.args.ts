@@ -1,7 +1,7 @@
 import { Field, ArgsType } from '@nestjs/graphql';
 
 @ArgsType()
-class GetProfileArgs {
+export class GetProfileArgs {
   @Field({ nullable: true })
   firstName?: string;
 
