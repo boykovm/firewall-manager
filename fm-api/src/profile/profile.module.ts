@@ -8,5 +8,6 @@ import { ProfileService } from './profile.service';
 @Module({
   imports: [DatabaseModule],
   providers: [ProfileResolver, ProfileService, ...profileProviders],
+  exports: [ProfileService],
 })
 export class ProfileModule {}

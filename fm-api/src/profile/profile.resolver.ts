@@ -1,18 +1,20 @@
-import { Args, Mutation, Query, Resolver } from '@nestjs/graphql';
+import { Args, Context, Mutation, Query, Resolver } from '@nestjs/graphql';
+import { UseGuards } from '@nestjs/common';
 
 import { Profile } from './models/profile.model';
 import { ProfileService } from './profile.service';
-import { CreateProfileArgs } from './dto/create-profile.args';
+import { CreateProfileArgs } from './dto/profile.args';
+import { AuthGuard } from '../auth/auth.guard';
 
 @Resolver(() => Profile)
 export class ProfileResolver {
   constructor(private readonly profileService: ProfileService) {}
 
   @Query(() => Profile)
-  async profile(
-    @Args('id', { type: () => String }) id: string,
-  ): Promise<Profile> {
-    return this.profileService.getById(id);
+  @UseGuards(AuthGuard)
+  async profile(@Context('req') request: any): Promise<Profile> {
+    const { user } = request;
+    return this.profileService.getById(user.userId);
   }
 
   @Mutation(() => Profile)
