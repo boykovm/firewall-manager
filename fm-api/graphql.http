@@ -1,3 +1,35 @@
-GET http://{{$server_url}}/graphql
+GET http://{{server_url}}/graphql
+
+>> historyFolder/examples.graphqls
+
+### Authentication
+GRAPHQL http://{{server_url}}/graphql
+
+mutation SignIn($username: String!, $password: String!) {
+    signIn(username: $username, password: $password) {
+        accessToken
+    }
+}
+
+{
+  "username": "{{users.qwe.username}}",
+  "password": "{{users.qwe.password}}"
+}
+
+> {%
+  client.global.set("auth_token", response.body.data.signIn.accessToken);
+%}
+
+
+### Simple Query over HTTP
+GRAPHQL http://{{server_url}}/graphql
+Authorization: Bearer {{auth_token}}
+
+query Profile {
+    profile {
+        username
+        email
+    }
+}
 
 
