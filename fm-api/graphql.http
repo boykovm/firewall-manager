@@ -1,0 +1,3 @@
+GET http://{{$server_url}}/graphql
+
+
