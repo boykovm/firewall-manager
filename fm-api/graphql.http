@@ -32,4 +32,24 @@ query Profile {
     }
 }
 
+### Check status
+GRAPHQL http://{{server_url}}/graphql
+Authorization: Bearer {{auth_token}}
+
+query GetFirewallStatus {
+    getFirewallStatus {
+        status
+    }
+}
+
+### Change status
+GRAPHQL http://{{server_url}}/graphql
+Authorization: Bearer {{auth_token}}
+
+mutation UpdateFirewallStatus {
+    #srarus: on off
+    updateFirewallStatus(newStatus: off) {
+        status
+    }
+}
 

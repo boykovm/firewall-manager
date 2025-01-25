@@ -1,4 +1,6 @@
 .idea
 
 fm-api/.gitignore
-fm-frontend/.gitignore
+fm-frontend/.gitignores
+
+test
