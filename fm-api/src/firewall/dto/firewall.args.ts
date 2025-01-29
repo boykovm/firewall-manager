@@ -35,3 +35,23 @@ export class UpdateFirewallStatusArgs {
   @Field(() => FirewallStatusEnum)
   newStatus: FirewallStatusEnum;
 }
+
+@ObjectType()
+export class FirewallSettings {
+  @Field(() => [String])
+  settings: Array<string>;
+}
+
+export enum FirewallNames {
+  ufw = 'ufw',
+}
+
+registerEnumType(FirewallNames, {
+  name: 'FirewallNames',
+});
+
+@ArgsType()
+export class FirewallSettingsArgs {
+  @Field(() => FirewallNames)
+  firewallName: FirewallNames;
+}

@@ -1,17 +1,26 @@
 import { BadRequestException, Injectable, InternalServerErrorException } from '@nestjs/common';
 import { exec } from 'child_process';
 
-import { FirewallStatusEnum, ProcessStatusEnum } from './dto/firewall.args';
+import { FirewallNames, FirewallStatusEnum, ProcessStatusEnum } from './dto/firewall.args';
 
 import { promisify } from 'util';
 
 @Injectable()
 export class FirewallService {
   private execPromise;
-  firewallUpdateConstants = {
+  firewallUpdateConstants: Record<FirewallNames, Record<FirewallStatusEnum, string>> = {
     ufw: {
       on: 'sudo ufw enable',
       off: 'sudo ufw disable',
+    },
+  };
+  firewallSettings: Record<FirewallNames, string> = {
+    ufw: 'sudo ufw status',
+  };
+  firewallStatusResponse: Record<FirewallNames, Record<FirewallStatusEnum, string>> = {
+    ufw: {
+      on: 'Status: active',
+      off: 'Status: inactive',
     },
   };
 
@@ -21,10 +30,15 @@ export class FirewallService {
   async getFirewallStatus(): Promise<FirewallStatusEnum> {
     const result = await this.runCommandPromise('sudo ufw status');
 
-    // TODO: add enum for responses
-    if (result.trim() === 'Status: active') {
+    const status = result.split('\n')?.[0];
+    if (!status) {
+      throw new InternalServerErrorException('Unable to get firewall status');
+    }
+
+    // TODO: add keyOf response
+    if (status === this.firewallStatusResponse.ufw.on) {
       return FirewallStatusEnum.on;
-    } else if (result.trim() === 'Status: inactive') {
+    } else if (status === this.firewallStatusResponse.ufw.off) {
       return FirewallStatusEnum.off;
     }
 
@@ -56,5 +70,16 @@ export class FirewallService {
     const currentStatus = await this.getFirewallStatus();
 
     return currentStatus === newFirewallStatus ? ProcessStatusEnum.success : ProcessStatusEnum.failed;
+  }
+
+  async getFirewallSettings(firewallName: FirewallNames): Promise<Array<string>> {
+    const cmd = this.firewallSettings[firewallName];
+    if (!cmd) {
+      throw new BadRequestException();
+    }
+
+    const result: string = await this.runCommandPromise(cmd);
+
+    return result.split('\n');
   }
 }

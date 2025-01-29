@@ -53,3 +53,17 @@ mutation UpdateFirewallStatus {
     }
 }
 
+### Check rules
+GRAPHQL http://{{server_url}}/graphql
+Authorization: Bearer {{auth_token}}
+
+query GetFirewallSettings($firewallName: FirewallNames!) {
+    getFirewallSettings(firewallName: $firewallName) {
+        settings
+    }
+}
+
+{
+  "firewallName": "ufw"
+}
+
