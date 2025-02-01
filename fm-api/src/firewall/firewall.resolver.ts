@@ -3,10 +3,10 @@ import { UseGuards } from '@nestjs/common';
 
 import { FirewallService } from './firewall.service';
 import {
-  FirewallSettings,
-  FirewallSettingsArgs,
+  AddFirewallRulesInput,
   FirewallStatus,
   ProcessStatus,
+  ProcessStatusEnum,
   UpdateFirewallStatusArgs,
 } from './dto/firewall.args';
 import { AuthGuard } from '../auth/auth.guard';
@@ -32,13 +32,12 @@ export class FirewallResolver {
     return { status };
   }
 
-  @Query(() => FirewallSettings)
+  @Mutation(() => ProcessStatus)
   @UseGuards(AuthGuard)
-  async getFirewallSettings(
-    @Args({ type: () => FirewallSettingsArgs })
-    args: FirewallSettingsArgs,
-  ): Promise<FirewallSettings> {
-    const settings = await this.firewallService.getFirewallSettings(args.firewallName);
-    return { settings };
+  async addRules(
+    @Args('addRules')
+    newRulesInput: AddFirewallRulesInput,
+  ): Promise<ProcessStatus> {
+    return { status: ProcessStatusEnum.success };
   }
 }

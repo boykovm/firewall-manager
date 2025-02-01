@@ -1,4 +1,4 @@
-import { ArgsType, Field, ObjectType, registerEnumType } from '@nestjs/graphql';
+import { ArgsType, Field, InputType, Int, ObjectType, registerEnumType } from '@nestjs/graphql';
 
 @ObjectType()
 export class FirewallStatus {
@@ -54,4 +54,52 @@ registerEnumType(FirewallNames, {
 export class FirewallSettingsArgs {
   @Field(() => FirewallNames)
   firewallName: FirewallNames;
+}
+
+export enum RuleStatusEnum {
+  'allow' = 'allow',
+  'denny' = 'deny',
+  'reject' = 'reject',
+  'limit' = 'limit',
+}
+
+registerEnumType(RuleStatusEnum, {
+  name: 'RuleStatusEnum',
+});
+
+export enum ProtocolNameEnum {
+  http = 'http',
+  tcp = 'tcp',
+  udp = 'udp',
+}
+
+registerEnumType(ProtocolNameEnum, {
+  name: 'ProtocolNameEnum',
+});
+
+@InputType()
+export class AddFirewallRulesInput {
+  @Field(() => FirewallNames)
+  firewallName: FirewallNames;
+
+  @Field(() => [Rule])
+  rules: Array<Rule>;
+}
+
+@InputType()
+export class Rule {
+  @Field(() => RuleStatusEnum)
+  ruleStatus: RuleStatusEnum;
+
+  @Field(() => ProtocolNameEnum)
+  protocolName: ProtocolNameEnum;
+
+  @Field(() => Int, { nullable: true })
+  sourceIp?: number;
+
+  @Field(() => String, { nullable: true })
+  ipRange?: string;
+
+  @Field(() => Int, { nullable: true })
+  destinationPort?: number;
 }
