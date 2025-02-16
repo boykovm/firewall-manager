@@ -1,7 +1,7 @@
 import { BadRequestException, Injectable, InternalServerErrorException } from '@nestjs/common';
 import { exec } from 'child_process';
 
-import { FirewallNames, FirewallStatusEnum, ProcessStatusEnum } from './dto/firewall.args';
+import { FirewallNames, FirewallStatusEnum, ProcessStatusEnum, Rule, RuleStatusEnum } from './dto/firewall.args';
 
 import { promisify } from 'util';
 
@@ -22,6 +22,20 @@ export class FirewallService {
       on: 'Status: active',
       off: 'Status: inactive',
     },
+  };
+  firewallRuleStatus: Record<FirewallNames, Record<RuleStatusEnum, string>> = {
+    ufw: {
+      allow: 'allow',
+      deny: 'deny',
+      reject: 'reject',
+      limit: 'allow',
+    },
+  };
+  firewallStatusRuleAdded: Record<FirewallNames, string> = {
+    ufw: 'Rule added',
+  };
+  firewallRuleAlreadyAdded: Record<FirewallNames, string> = {
+    ufw: 'Skipping adding existing rule',
   };
 
   constructor() {
@@ -81,5 +95,61 @@ export class FirewallService {
     const result: string = await this.runCommandPromise(cmd);
 
     return result.split('\n');
+  }
+
+  async addFirewallRules(firewallName: FirewallNames, rules: Rule[]): Promise<ProcessStatusEnum[]> {
+    const promises = [];
+    rules.forEach((rule) => {
+      const command = this.firewallRuleConvertor(firewallName, rule);
+
+      promises.push(this.runCommandPromise(command));
+    });
+
+    const statuses = await Promise.all(promises);
+
+    const executionSuccess = statuses.map((status) => {
+      const result = status.split('\n').filter((res) => res.length);
+
+      return (
+        result.includes(this.firewallStatusRuleAdded[firewallName]) ||
+        result.includes(this.firewallRuleAlreadyAdded[firewallName])
+      );
+    });
+
+    return executionSuccess.map((result) => (result ? ProcessStatusEnum.success : ProcessStatusEnum.failed));
+  }
+
+  firewallRuleConvertor(firewallName: FirewallNames, { ruleFrom, ruleTo, ruleStatus, protocolName }: Rule): string {
+    let command = `sudo ${firewallName} ${this.firewallRuleStatus[firewallName][ruleStatus]} `;
+
+    if (ruleFrom?.ipRange) {
+      command += `from ${ruleFrom.ipRange} `;
+    } else if (ruleFrom?.ip) {
+      command += `from ${ruleFrom.ip} `;
+    } else {
+      command += `from any `;
+    }
+
+    if (ruleFrom?.port) {
+      command += `port ${ruleFrom.port} `;
+    }
+
+    if (protocolName) {
+      command += `proto ${protocolName} `;
+    }
+
+    if (ruleTo?.ipRange) {
+      command += `to ${ruleTo.ipRange} `;
+    } else if (ruleTo?.ip) {
+      command += `to ${ruleTo.ip} `;
+    } else {
+      command += `to any `;
+    }
+
+    if (ruleTo?.port) {
+      command += `port ${ruleTo.port}`;
+    }
+
+    return command;
   }
 }

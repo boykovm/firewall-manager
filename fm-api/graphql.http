@@ -48,7 +48,7 @@ Authorization: Bearer {{auth_token}}
 
 mutation UpdateFirewallStatus {
     #srarus: on off
-    updateFirewallStatus(newStatus: off) {
+    updateFirewallStatus(newStatus: on) {
         status
     }
 }
@@ -67,3 +67,37 @@ query GetFirewallSettings($firewallName: FirewallNames!) {
   "firewallName": "ufw"
 }
 
+### Add Rules
+
+GRAPHQL http://{{server_url}}/graphql
+Authorization: Bearer {{auth_token}}
+
+mutation AddFirewallSettings($addRules: AddFirewallRulesInput!) {
+    addRules(addRules: $addRules) {
+        statuses {
+            status
+        }
+    }
+}
+
+{
+  "addRules": {
+    "firewallName": "ufw",
+    "rules": [
+      {
+        "ruleStatus": "allow",
+        "protocolName": "udp",
+        "ruleFrom": {
+          "ip": "1.2.3.9"
+        }
+      },
+      {
+        "ruleStatus": "deny",
+        "protocolName": "tcp",
+        "ruleTo": {
+          "ip": "1.2.3.6"
+        }
+      }
+    ]
+  }
+}
