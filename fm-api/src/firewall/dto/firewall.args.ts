@@ -21,6 +21,12 @@ export class ProcessStatus {
   status: ProcessStatusEnum;
 }
 
+@ObjectType()
+export class ProcessStatuses {
+  @Field(() => [ProcessStatus])
+  statuses: Array<ProcessStatus>;
+}
+
 export enum ProcessStatusEnum {
   success = 'success',
   failed = 'failed',
@@ -57,10 +63,10 @@ export class FirewallSettingsArgs {
 }
 
 export enum RuleStatusEnum {
-  'allow' = 'allow',
-  'denny' = 'deny',
-  'reject' = 'reject',
-  'limit' = 'limit',
+  allow = 'allow',
+  deny = 'deny',
+  reject = 'reject',
+  limit = 'limit',
 }
 
 registerEnumType(RuleStatusEnum, {
@@ -71,6 +77,7 @@ export enum ProtocolNameEnum {
   http = 'http',
   tcp = 'tcp',
   udp = 'udp',
+  ssh = 'ssh',
 }
 
 registerEnumType(ProtocolNameEnum, {
@@ -87,19 +94,30 @@ export class AddFirewallRulesInput {
 }
 
 @InputType()
-export class Rule {
-  @Field(() => RuleStatusEnum)
-  ruleStatus: RuleStatusEnum;
+export class RulePart {
+  // todo: add validation
+  @Field(() => String, { nullable: true })
+  ip?: string;
 
-  @Field(() => ProtocolNameEnum)
-  protocolName: ProtocolNameEnum;
-
-  @Field(() => Int, { nullable: true })
-  sourceIp?: number;
-
+  // todo: add validation
   @Field(() => String, { nullable: true })
   ipRange?: string;
 
   @Field(() => Int, { nullable: true })
-  destinationPort?: number;
+  port?: number;
+}
+
+@InputType()
+export class Rule {
+  @Field(() => RuleStatusEnum)
+  ruleStatus: RuleStatusEnum;
+
+  @Field(() => ProtocolNameEnum, { nullable: true })
+  protocolName?: ProtocolNameEnum;
+
+  @Field(() => RulePart, { nullable: true })
+  ruleFrom: RulePart;
+
+  @Field(() => RulePart, { nullable: true })
+  ruleTo: RulePart;
 }
