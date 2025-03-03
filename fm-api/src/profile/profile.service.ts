@@ -6,9 +6,7 @@ import { CreateProfileArgs } from './dto/profile.args';
 
 @Injectable()
 export class ProfileService {
-  constructor(
-    @Inject('PROFILE_MODEL') private readonly profileModel: Model<Profile>,
-  ) {}
+  constructor(@Inject('PROFILE_MODEL') private readonly profileModel: Model<Profile>) {}
 
   async create(createProfileDto: CreateProfileArgs): Promise<Profile> {
     const profileByEmail = await this.getByEmail(createProfileDto.email);
@@ -16,9 +14,7 @@ export class ProfileService {
       throw new BadRequestException('Profile already exists');
     }
 
-    const profileByUsername = await this.getByUsername(
-      createProfileDto.username,
-    );
+    const profileByUsername = await this.getByUsername(createProfileDto.username);
     if (profileByUsername) {
       throw new BadRequestException('Profile with such name already exists');
     }
