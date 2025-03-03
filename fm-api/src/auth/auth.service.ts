@@ -12,7 +12,9 @@ export class AuthService {
   ) {}
 
   async signIn(signInArgs: SignInArgs): Promise<string> {
-    const profile = await this.profileService.getByUsername(signInArgs.username);
+    const profile = await this.profileService.getByUsername(
+      signInArgs.username,
+    );
     if (!profile || profile?.password !== signInArgs.password) {
       throw new NotFoundException("Profile doesn't exist");
     }
