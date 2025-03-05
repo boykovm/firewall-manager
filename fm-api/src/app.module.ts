@@ -6,6 +6,7 @@ import { ConfigModule } from '@nestjs/config';
 import { ProfileModule } from './profile/profile.module';
 import { AuthModule } from './auth/auth.module';
 import { FirewallModule } from './firewall/firewall.module';
+import { RoleModule } from './role/role.module';
 
 @Module({
   imports: [
@@ -17,6 +18,7 @@ import { FirewallModule } from './firewall/firewall.module';
     ProfileModule,
     AuthModule,
     FirewallModule,
+    RoleModule,
   ],
 })
 export class AppModule {}
